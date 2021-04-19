@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tibble)
 library(purrr)
+library(dplyr)
 
 generate_schedule <- function(){
 
@@ -20,15 +21,15 @@ generate_schedule <- function(){
                      "Sunday_405","Sunday_425","Sunday_820", "Monday_815")
   possible_opponents <- c("Bills", "Dolphins", "Patriots", "Jaguars",
   "Titans", "Saints","Buccaneers", "Bengals") 
-  possible_week <- c("Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6", "Week 7", "Week 8",
-            "Week 9", "Week 10", "Week 11", "Week 12", "Week 13", "Week 14", "Week 15", "Week 16")
+  possible_week <- c(1:16)
 
   sched = tibble(
     time = sample(possible_days, 8, replace=TRUE),
     opponent= sample(possible_opponents, 8, replace=FALSE),
     week = sample(possible_week, 8, replace = FALSE)
   )
-  ifelse
+  sched <- as.data.frame(sched)
+  sched <- sched %>% arrange(week)
   return(sched)
 }
 
