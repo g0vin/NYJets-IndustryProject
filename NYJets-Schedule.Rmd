@@ -1,6 +1,6 @@
 ---
 title: "NY Jets Schedule"
-author: "Govin Nagpal"
+author: "Govin Nagpal, Najah Allah, Antoine Noel, Gavin Benbrook"
 date: "4/17/2021"
 output: html_document
 ---
