@@ -16,26 +16,58 @@ library(purrr)
 library(dplyr)
 
 generate_schedule <- function(){
-
+  success <- FALSE
+  while (!success) {
+  
   possible_days <- c("Thursday_820", "Saturday_430","Saturday_820","Sunday_100",
                      "Sunday_405","Sunday_425","Sunday_820", "Monday_815")
   possible_opponents <- c("Bills", "Dolphins", "Patriots", "Jaguars",
   "Titans", "Saints","Buccaneers", "Bengals") 
   possible_week <- c(1:16)
-
+  
   sched = tibble(
     time = sample(possible_days, 8, replace=TRUE),
     opponent= sample(possible_opponents, 8, replace=FALSE),
     week = sample(possible_week, 8, replace = FALSE)
   )
+  
   sched <- as.data.frame(sched)
   sched <- sched %>% arrange(week)
+  
+  x<-ifelse(sched$time[1]=="Monday_815" & sched$time[2]=="Thursday_820" |
+              sched$time[2]=="Monday_815" & sched$time[3]=="Thursday_820" |
+              sched$time[3]=="Monday_815" & sched$time[4]=="Thursday_820"|
+              sched$time[4]=="Monday_815" & sched$time[5]=="Thursday_820"|
+              sched$time[5]=="Monday_815" & sched$time[6]=="Thursday_820"|
+              sched$time[6]=="Monday_815" & sched$time[7]=="Thursday_820"|
+              sched$time[7]=="Monday_815" & sched$time[8]=="Thursday_820"|
+              sched$time[1] == "Saturday_430"| sched$time[2] == "Saturday_430"
+            | sched$time[3] == "Saturday_430"| sched$time[4] == "Saturday_430"
+            | sched$time[5] == "Saturday_430"| sched$time[6] == "Saturday_430"
+            | sched$time[1] == "Saturday_820"| sched$time[2] == "Saturday_820"
+            | sched$time[3] == "Saturday_820"| sched$time[4] == "Saturday_820"
+            | sched$time[5] == "Saturday_820"| sched$time[6] == "Saturday_820"
+            | sched$time[7] == "Saturday_820" & sched$week[7]<15
+            | sched$time[7] == "Saturday_820" & sched$week[7]<15
+            | sched$time[8] == "Saturday_430" & sched$week[8]<15
+            | sched$time[8] == "Saturday_430" & sched$week[8]<15
+            | sched$week[4] - sched$week[1] < 4
+            | sched$week[5] - sched$week[2] < 4
+            | sched$week[6] - sched$week[3] < 4
+            | sched$week[7] - sched$week[4] < 4
+            | sched$week[8] - sched$week[5] < 4
+            ,0,1) 
+  success <- x > 0
+  }
   return(sched)
 }
 
-n <- 20
-simulation<-map(seq_len(n), ~generate_schedule())
-str(simulation)
-as.data.frame(simulation)
+generate_schedule()
+
+x <- 1
+while (x < 100){
+  print(generate_schedule())
+  x = x+1
+}
 ```
 
