@@ -48,8 +48,8 @@ generate_schedule <- function(){
             | sched$time[3] == "Saturday_820"| sched$time[4] == "Saturday_820"
             | sched$time[5] == "Saturday_820"| sched$time[6] == "Saturday_820"
             | sched$time[7] == "Saturday_820" & sched$week[7]<15
-            | sched$time[7] == "Saturday_820" & sched$week[7]<15
-            | sched$time[8] == "Saturday_430" & sched$week[8]<15
+            | sched$time[8] == "Saturday_820" & sched$week[8]<15
+            | sched$time[7] == "Saturday_430" & sched$week[7]<15
             | sched$time[8] == "Saturday_430" & sched$week[8]<15
             | sched$week[4] - sched$week[1] < 4
             | sched$week[5] - sched$week[2] < 4
