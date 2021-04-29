@@ -1,0 +1,37 @@
+---
+title: "K-Means Clustering Model"
+author: "Govin Nagpal"
+date: "4/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+```{r}
+# Game clustering 
+
+library(readxl)
+library(stats)
+
+Game_Clustering_Jets <- read_excel("~/Downloads/Game_Clustering_Jets (3).xlsx", sheet="Sheet1")
+
+model <- lm(Median_Price ~ GameType + Percentage_W_previous_season, 
+            data = Game_Clustering_Jets)
+summary(model)
+
+Clustering <- Game_Clustering_Jets[c("ELO", "Facebook_Followers", "Percentage_W_previous_season")]
+
+Clustering
+
+x <- kmeans(Clustering, centers = 3, iter.max = 10, nstart = 1)
+x$cluster
+
+Game_Clustering_Jets$cluster <- ifelse(x$cluster==1,1,ifelse(x$cluster==2,2,3))
+Game_Clustering_Jets$cluster <- as.factor(Game_Clustering_Jets$cluster)
+
+Game_Clustering_Jets %>% group_by(cluster) %>% 
+  summarise(mean = mean(Median_Price))
+```
