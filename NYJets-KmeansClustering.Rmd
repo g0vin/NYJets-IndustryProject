@@ -22,9 +22,12 @@ model <- lm(Median_Price ~ GameType + Percentage_W_previous_season,
             data = Game_Clustering_Jets)
 summary(model)
 
+
+#Only 3 numerical variables 
 Clustering <- Game_Clustering_Jets[c("ELO", "Facebook_Followers", "Percentage_W_previous_season")]
 
 Clustering
+
 
 x <- kmeans(Clustering, centers = 3, iter.max = 10, nstart = 1)
 x$cluster
@@ -32,6 +35,66 @@ x$cluster
 Game_Clustering_Jets$cluster <- ifelse(x$cluster==1,1,ifelse(x$cluster==2,2,3))
 Game_Clustering_Jets$cluster <- as.factor(Game_Clustering_Jets$cluster)
 
+
+Game_Clustering_Jets %>% 
+  group_by(cluster) %>% 
+  summarise(mean = mean(Median_Price))
+
+
+#install.packages("factoextra")
+install.packages("broom")
+library(factoextra)
+
+elbow <- fviz_nbclust(Clustering, FUNcluster = kmeans, method="wss")
+elbow
+```
+
+
+```{r}
+
+Game_Clustering_Jets$TOD <- ifelse(Game_Clustering_Jets$'Time of the day' == "Noon", 1,
+                               ifelse(Game_Clustering_Jets$'Time of the day' == "Afternoon", 2, 3))
+
+
+
+Game_Clustering_Jets$GT <- ifelse(Game_Clustering_Jets$GameType == "Preseason", 2, 1)
+
+
+
+Game_Clustering_Jets$DOW <- ifelse(Game_Clustering_Jets$Event_Day == "Thursday", 1,
+                               ifelse(Game_Clustering_Jets$Event_Day== "Friday", 2,
+                                      ifelse(Game_Clustering_Jets$Event_Day== "Saturday", 3, 
+                                             ifelse(Game_Clustering_Jets$Event_Day== "Sunday", 4, 5))))
+
+
+
+Game_Clustering_Jets$Weather <- ifelse(Game_Clustering_Jets$Month == "August", 1,
+                               ifelse(Game_Clustering_Jets$Month== "September", 2,
+                                      ifelse(Game_Clustering_Jets$Month== "October", 3, 
+                                             ifelse(Game_Clustering_Jets$Month== "November", 4,
+                                                    ifelse(Game_Clustering_Jets$Month== "December", 5, 5)))))
+
+
+
+
+Clustering <- Game_Clustering_Jets[,c("ELO", "Facebook_Followers", "Percentage_W_previous_season", "TOD", "GT", "DOW", "Weather")]
+Clustering
+x <- kmeans(Clustering, centers = 3, iter.max = 10, nstart = 1)
+x$cluster
+Game_Clustering_Jets$cluster <- ifelse(x$cluster==1,1,ifelse(x$cluster==2,2,3))
+Game_Clustering_Jets$cluster <- as.factor(Game_Clustering_Jets$cluster)
 Game_Clustering_Jets %>% group_by(cluster) %>% 
   summarise(mean = mean(Median_Price))
+
+
+Clustering_on_price <- Game_Clustering_Jets[c("Median_Price")]
+Clustering_on_price
+y <- kmeans(Clustering_on_price, centers = 3, iter.max = 10, nstart = 1)
+y$cluster
+Game_Clustering_Jets$cluster_test <- ifelse(y$cluster==1,1,ifelse(y$cluster==2,2,3))
+Game_Clustering_Jets$cluster_test <- as.factor(Game_Clustering_Jets$cluster_test)
+Game_Clustering_Jets %>% group_by(cluster_test) %>% 
+  summarise(mean = mean(Median_Price))
+
 ```
+
