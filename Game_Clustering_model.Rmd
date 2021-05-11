@@ -48,7 +48,12 @@ Ticket_Exchange_raw <- read.csv("Ticket Exchange.csv")
 Ticket_Exchange_raw
 
 #Create a new variable called Time_Before that find the difference between the event day and the day the ticket was purchases
-Ticket_Exchange_raw$Time_Before <- difftime(Ticket_Exchange_raw$event_date, Ticket_Exchange_raw$add_datetime, units= "days")
+Ticket_Exchange$Time_Before <- difftime(Ticket_Exchange_raw$event_date, Ticket_Exchange$add_datetime, units= "days")
+
+
+##### WHERE I LEFT OFF, I'm trying to convert negative values in Time_before to 0.
+Ticket_Exchange <- Ticket_Exchange %>%
+  
 
 #Remove the missing data from the Ticket Exchange file
 Ticket_Exchange <- Ticket_Exchange_raw[!Ticket_Exchange_raw$te_posting_price == "NULL", ] 
