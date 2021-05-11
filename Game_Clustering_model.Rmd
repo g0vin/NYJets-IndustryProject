@@ -32,8 +32,8 @@ game_clustering_jets
 
 
 #Create the model
-model1 <- glm(Average_Price~GameType+ELO+Facebook_Followers*Percentage_W_previous_season,data=game_clustering_jets)
-summary(model1)
+# model1 <- glm(Average_Price~GameType+ELO+Facebook_Followers*Percentage_W_previous_season,data=game_clustering_jets)
+# summary(model1)
 ```
 
 
@@ -47,6 +47,9 @@ library(readxl)
 Ticket_Exchange_raw <- read.csv("Ticket Exchange.csv")
 Ticket_Exchange_raw
 
+#Create a new variable called Time_Before that find the difference between the event day and the day the ticket was purchases
+Ticket_Exchange_raw$Time_Before <- difftime(Ticket_Exchange_raw$event_date, Ticket_Exchange_raw$add_datetime, units= "days")
+
 #Remove the missing data from the Ticket Exchange file
 Ticket_Exchange <- Ticket_Exchange_raw[!Ticket_Exchange_raw$te_posting_price == "NULL", ] 
 Ticket_Exchange <- na.omit(Ticket_Exchange)
@@ -55,7 +58,7 @@ Ticket_Exchange <- na.omit(Ticket_Exchange)
 Ticket_Exchange$te_posting_price <- as.numeric(Ticket_Exchange$te_posting_price)
 
 
-#merge price level section mapping dat aset and ticket exchange data set on section, row, and seat
+#Merge price level section mapping dataset and ticket exchange data set on section, row, and seat
 library(tidyverse)
 Ticket_Exchange_raw <- Ticket_Exchange_raw %>% 
   rename(
@@ -65,6 +68,7 @@ Ticket_Exchange_raw <- Ticket_Exchange_raw %>%
     )
 tickets <- merge(Price_Level_Section_Mapping_raw, Ticket_Exchange_raw, by = c("Section", "Row", "Seat"))
 
+#Rename the ID variable to event_id
 game_clustering_jets <- game_clustering_jets %>% 
   rename(
     event_id = ID
@@ -77,8 +81,7 @@ tickets<-tickets %>%
 #Merge the already merged ticket data from above with the Excel spreadsheet data we created 
 tickets_all <- merge(tickets, game_clustering_jets,  by="event_id")
 
-
-
+tickets_all
 
 #Filter by level
 lower_level <- tickets_all %>% 
@@ -92,7 +95,7 @@ upper_level <- tickets_all %>%
 
 
 #Regression
-model1 <- lm(te_purchase_price ~ ELO + Event_Day + `Time of the day` + Facebook_Followers, data=lower_level)
-summary(model1)
+# model1 <- lm(te_purchase_price ~ ELO + Event_Day + `Time of the day` + Facebook_Followers, data=lower_level)
+# summary(model1)
 ```
 
