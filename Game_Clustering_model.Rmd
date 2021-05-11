@@ -1,0 +1,98 @@
+---
+title: "Game Clustering Model"
+author: "Govin Nagpal"
+date: "4/27/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+```{r}
+#Read in the data
+library(readxl)
+game_clustering_jets <- read_excel("~/Downloads/Game_Clustering_Jets (2).xlsx")
+game_clustering_jets
+
+#Bin the average price column
+# binavg <- quantile(game_clustering_jets$Average_Price, probs = seq(0,1,length.out=4))
+# game_clustering_jets$bin_average <- cut(game_clustering_jets$Average_Price, breaks = binavg, include.lowest=T, right=F)
+# 
+# #Bin the median price column
+# binmed <- quantile(game_clustering_jets$Median_Price, probs = seq(0,1,length.out=4))
+# game_clustering_jets$bin_median <- cut(game_clustering_jets$Median_Price, breaks = binmed, include.lowest=T, right=F)
+# 
+# #Check out the new columns
+# game_clustering_jets
+# 
+# #Write the csv
+# write.csv(game_clustering_jets, "game_clustering_jets_bins.csv")
+
+
+#Create the model
+model1 <- glm(Average_Price~GameType+ELO+Facebook_Followers*Percentage_W_previous_season,data=game_clustering_jets)
+summary(model1)
+```
+
+
+```{r}
+#Read the Price Level Section Mapping data in
+Price_Level_Section_Mapping_raw <- read.csv("~/Downloads/Price Level Section Mapping.csv")
+
+#Read the Ticket Exchange data in 
+setwd("~/Documents")
+library(readxl)
+Ticket_Exchange_raw <- read.csv("Ticket Exchange.csv")
+Ticket_Exchange_raw
+
+#Remove the missing data from the Ticket Exchange file
+Ticket_Exchange <- Ticket_Exchange_raw[!Ticket_Exchange_raw$te_posting_price == "NULL", ] 
+Ticket_Exchange <- na.omit(Ticket_Exchange)
+
+#Change the variable type of posting price from character to numeric 
+Ticket_Exchange$te_posting_price <- as.numeric(Ticket_Exchange$te_posting_price)
+
+
+#merge price level section mapping dat aset and ticket exchange data set on section, row, and seat
+library(tidyverse)
+Ticket_Exchange_raw <- Ticket_Exchange_raw %>% 
+  rename(
+    Section = section_name,
+    Row = row_name,
+    Seat = seat_num
+    )
+tickets <- merge(Price_Level_Section_Mapping_raw, Ticket_Exchange_raw, by = c("Section", "Row", "Seat"))
+
+game_clustering_jets <- game_clustering_jets %>% 
+  rename(
+    event_id = ID
+    )
+
+#Remove NULL values from the te_purchase_price column
+tickets<-tickets %>%
+  filter(te_purchase_price!="NULL")
+
+#Merge the already merged ticket data from above with the Excel spreadsheet data we created 
+tickets_all <- merge(tickets, game_clustering_jets,  by="event_id")
+
+
+
+
+#Filter by level
+lower_level <- tickets_all %>% 
+  filter(Level == "Lower")
+club_level <- tickets_all %>% 
+  filter(Level == "Club")
+mezzanine_level <- tickets_all %>% 
+  filter(Level == "Mezzanine")
+upper_level <- tickets_all %>% 
+  filter(Level == "Upper")
+
+
+#Regression
+model1 <- lm(te_purchase_price ~ ELO + Event_Day + `Time of the day` + Facebook_Followers, data=lower_level)
+summary(model1)
+```
+
