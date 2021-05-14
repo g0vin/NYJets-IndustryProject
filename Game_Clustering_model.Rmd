@@ -48,12 +48,19 @@ Ticket_Exchange_raw <- read.csv("Ticket Exchange.csv")
 Ticket_Exchange_raw
 
 #Create a new variable called Time_Before that find the difference between the event day and the day the ticket was purchases
-Ticket_Exchange$Time_Before <- difftime(Ticket_Exchange_raw$event_date, Ticket_Exchange$add_datetime, units= "days")
+Ticket_Exchange_raw$Time_Before <- difftime(Ticket_Exchange_raw$event_date, Ticket_Exchange_raw$add_datetime, units= "days")
 
 
 ##### WHERE I LEFT OFF, I'm trying to convert negative values in Time_before to 0.
-Ticket_Exchange <- Ticket_Exchange %>%
-  
+Ticket_Exchange_raw$Time_Before <- ifelse(Ticket_Exchange_raw$Time_Before <0, 0, Ticket_Exchange_raw$Time_Before)
+
+#Create buckets for different purchase times
+Ticket_Exchange_raw$purchase_date <- ifelse(Ticket_Exchange_raw$Time_Before == 0, "Day_of", ifelse(Ticket_Exchange_raw$Time_Before<=7 & Ticket_Exchange_raw$Time_Before>0, "Week_of", ifelse(Ticket_Exchange_raw$Time_Before<=28 & Ticket_Exchange_raw$Time_Before>7, "4_Weeks", "months_before")))
+Ticket_Exchange_raw$purchase_day_of <- ifelse(Ticket_Exchange_raw$purchase_date == "Day_of", 1, 0)
+Ticket_Exchange_raw$purchase_week_of <- ifelse(Ticket_Exchange_raw$purchase_date == "Week_of", 1, 0)
+Ticket_Exchange_raw$purchase_month_of <- ifelse(Ticket_Exchange_raw$purchase_date == "4_Weeks", 1, 0)
+Ticket_Exchange_raw$purchase_over_month_out <- ifelse(Ticket_Exchange_raw$purchase_date == "months_before", 1, 0)
+
 
 #Remove the missing data from the Ticket Exchange file
 Ticket_Exchange <- Ticket_Exchange_raw[!Ticket_Exchange_raw$te_posting_price == "NULL", ] 
@@ -102,5 +109,21 @@ upper_level <- tickets_all %>%
 #Regression
 # model1 <- lm(te_purchase_price ~ ELO + Event_Day + `Time of the day` + Facebook_Followers, data=lower_level)
 # summary(model1)
+
+
+lower_model1 <- lm(te_purchase_price ~ purchase_week_of + purchase_month_of + purchase_over_month_out, data=lower_level)
+summary(lower_model1)
+
+club_model1 <- lm(te_purchase_price ~ purchase_week_of + purchase_month_of + purchase_over_month_out, data=club_level)
+summary(club_model1)
+
+mezzanine_model1 <- lm(te_purchase_price ~ purchase_week_of + purchase_month_of + purchase_over_month_out, data=mezzanine_level)
+summary(mezzanine_model1)
+
+upper_model1 <- lm(te_purchase_price ~ purchase_week_of + purchase_month_of + purchase_over_month_out, data=upper_level)
+summary(upper_model1)
+
+Ticket_Exchange_raw %>% 
+  arrange(purchase_week_of, desc=T)
 ```
 
