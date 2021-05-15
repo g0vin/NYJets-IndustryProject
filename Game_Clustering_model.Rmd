@@ -78,7 +78,7 @@ Ticket_Exchange_raw <- Ticket_Exchange_raw %>%
     Row = row_name,
     Seat = seat_num
     )
-tickets <- merge(Price_Level_Section_Mapping_raw, Ticket_Exchange_raw, by = c("Section", "Row", "Seat"))
+tickets <- ?merge(Price_Level_Section_Mapping_raw, Ticket_Exchange_raw, by = c("Section", "Row", "Seat"))
 
 #Rename the ID variable to event_id
 game_clustering_jets <- game_clustering_jets %>% 
@@ -93,7 +93,7 @@ tickets<-tickets %>%
 #Merge the already merged ticket data from above with the Excel spreadsheet data we created 
 tickets_all <- merge(tickets, game_clustering_jets,  by="event_id")
 
-tickets_all
+unique(tickets_all$activity_name)
 
 #Filter by level
 lower_level <- tickets_all %>% 
