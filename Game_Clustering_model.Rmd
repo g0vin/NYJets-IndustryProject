@@ -34,25 +34,50 @@ game_clustering_jets
 #Create the model
 # model1 <- glm(Average_Price~GameType+ELO+Facebook_Followers*Percentage_W_previous_season,data=game_clustering_jets)
 # summary(model1)
+
+
+#New variables Gavin created
+game_clustering_jets$TOD <- ifelse(game_clustering_jets$'Time of the day' == "Noon", 1,
+                               ifelse(game_clustering_jets$'Time of the day' == "Afternoon", 2, 3))
+
+
+#Transform GameType variable to GT
+game_clustering_jets$GT <- ifelse(game_clustering_jets$GameType == "Preseason", 2, 1)
+
+
+#Transform Event_Day variable to DOW
+game_clustering_jets$DOW <- ifelse(game_clustering_jets$Event_Day == "Thursday", 1,
+                               ifelse(game_clustering_jets$Event_Day== "Friday", 2,
+                                      ifelse(game_clustering_jets$Event_Day== "Saturday", 3, 
+                                             ifelse(game_clustering_jets$Event_Day== "Sunday", 4, 5))))
+
+
+#Transform Month variable to Weather
+game_clustering_jets$Weather <- ifelse(game_clustering_jets$Month == "August", 1,
+                               ifelse(game_clustering_jets$Month== "September", 2,
+                                      ifelse(game_clustering_jets$Month== "October", 3, 
+                                             ifelse(game_clustering_jets$Month== "November", 4,
+                                                    ifelse(game_clustering_jets$Month== "December", 5, 5)))))
+
+
 ```
 
 
-```{r}
-#Read the Price Level Section Mapping data in
-Price_Level_Section_Mapping_raw <- read.csv("~/Downloads/Price Level Section Mapping.csv")
-
+```{r, Raw data and adding in new variables}
 #Read the Ticket Exchange data in 
 setwd("~/Documents")
 library(readxl)
-Ticket_Exchange_raw <- read.csv("Ticket Exchange.csv")
+Ticket_Exchange_raw <- read.csv("~/Documents/Ticket Exchange.csv")
 Ticket_Exchange_raw
+
 
 #Create a new variable called Time_Before that find the difference between the event day and the day the ticket was purchases
 Ticket_Exchange_raw$Time_Before <- difftime(Ticket_Exchange_raw$event_date, Ticket_Exchange_raw$add_datetime, units= "days")
 
 
-##### WHERE I LEFT OFF, I'm trying to convert negative values in Time_before to 0.
+#Convert negative values in Time_before to 0.
 Ticket_Exchange_raw$Time_Before <- ifelse(Ticket_Exchange_raw$Time_Before <0, 0, Ticket_Exchange_raw$Time_Before)
+
 
 #Create buckets for different purchase times
 Ticket_Exchange_raw$purchase_date <- ifelse(Ticket_Exchange_raw$Time_Before == 0, "Day_of", ifelse(Ticket_Exchange_raw$Time_Before<=7 & Ticket_Exchange_raw$Time_Before>0, "Week_of", ifelse(Ticket_Exchange_raw$Time_Before<=28 & Ticket_Exchange_raw$Time_Before>7, "4_Weeks", "months_before")))
@@ -60,8 +85,11 @@ Ticket_Exchange_raw$purchase_day_of <- ifelse(Ticket_Exchange_raw$purchase_date 
 Ticket_Exchange_raw$purchase_week_of <- ifelse(Ticket_Exchange_raw$purchase_date == "Week_of", 1, 0)
 Ticket_Exchange_raw$purchase_month_of <- ifelse(Ticket_Exchange_raw$purchase_date == "4_Weeks", 1, 0)
 Ticket_Exchange_raw$purchase_over_month_out <- ifelse(Ticket_Exchange_raw$purchase_date == "months_before", 1, 0)
+```
 
 
+
+```{r, Remove missing data and transform data }
 #Remove the missing data from the Ticket Exchange file
 Ticket_Exchange <- Ticket_Exchange_raw[!Ticket_Exchange_raw$te_posting_price == "NULL", ] 
 Ticket_Exchange <- na.omit(Ticket_Exchange)
@@ -70,15 +98,20 @@ Ticket_Exchange <- na.omit(Ticket_Exchange)
 Ticket_Exchange$te_posting_price <- as.numeric(Ticket_Exchange$te_posting_price)
 
 
+#Read the Price Level Section Mapping data in
+Price_Level_Section_Mapping_raw <- read.csv("~/Downloads/Price Level Section Mapping.csv")
+
 #Merge price level section mapping dataset and ticket exchange data set on section, row, and seat
 library(tidyverse)
-Ticket_Exchange_raw <- Ticket_Exchange_raw %>% 
+Ticket_Exchange <- Ticket_Exchange %>% 
   rename(
     Section = section_name,
     Row = row_name,
     Seat = seat_num
     )
-tickets <- ?merge(Price_Level_Section_Mapping_raw, Ticket_Exchange_raw, by = c("Section", "Row", "Seat"))
+
+#Merge the Ticket_Exchange and the Price_Level_Section_Mapping data sets
+tickets <- merge(Price_Level_Section_Mapping_raw, Ticket_Exchange, by = c("Section", "Row", "Seat"))
 
 #Rename the ID variable to event_id
 game_clustering_jets <- game_clustering_jets %>% 
@@ -87,15 +120,18 @@ game_clustering_jets <- game_clustering_jets %>%
     )
 
 #Remove NULL values from the te_purchase_price column
-tickets<-tickets %>%
+tickets <- tickets %>%
   filter(te_purchase_price!="NULL")
 
 #Merge the already merged ticket data from above with the Excel spreadsheet data we created 
 tickets_all <- merge(tickets, game_clustering_jets,  by="event_id")
 
+#Change the type of Rows from character to integer
+tickets_all$Row <- as.numeric(tickets_all$Row)
+
 unique(tickets_all$activity_name)
 
-#Filter by level
+#Filter by stadium level
 lower_level <- tickets_all %>% 
   filter(Level == "Lower")
 club_level <- tickets_all %>% 
@@ -107,8 +143,29 @@ upper_level <- tickets_all %>%
 
 
 #Regression
-# model1 <- lm(te_purchase_price ~ ELO + Event_Day + `Time of the day` + Facebook_Followers, data=lower_level)
+
+lower_levelno2019 <- lower_level %>%
+  filter(season_year!=2019)
+
+lower_level2019 <- lower_level %>%
+  filter(season_year==2019)
+
+# model1 <- lm(te_purchase_price~season_year+Opponent+Event_Day+Month+Facebook_Followers+Percentage_W_previous_season+Section, data=lower_levelno2019)
 # summary(model1)
+# predict(model1, data.frame(season_year=2019, Opponent="New Orleans Saints", Event_Day="Saturday", Month="August", Facebook_Followers=4020000, Percentage_W_previous_season=0.813, Section="126"))
+
+#Remove leading whitespace in Opponent names
+lower_level2019$Opponent <- str_trim(lower_level2019$Opponent , side ="right")
+model1 <- lm(te_purchase_price~season_year+Opponent+Event_Day+Month+Facebook_Followers+Percentage_W_previous_season+Section+Row+Seat+ELO, data=lower_levelno2019)
+summary(model1)
+
+
+#Create a new data set with only the important variables
+subset_dataset_for_prediction <- lower_level2019 %>%
+  select(season_year, Opponent, Event_Day, Month, Facebook_Followers, Percentage_W_previous_season, Section,Row, Seat, ELO)
+
+#Predict the purchase price based on our model
+lower_level<- predict(model1, newdata = subset_dataset_for_prediction)
 
 
 lower_model1 <- lm(te_purchase_price ~ purchase_week_of + purchase_month_of + purchase_over_month_out, data=lower_level)
