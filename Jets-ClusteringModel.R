@@ -34,7 +34,7 @@ game_clustering_jets <- game_clustering_jets %>%
 ###########################################################################################################################
 
 # Read the Ticket Exchange data in 
-Ticket_Exchange_raw <- read.csv("~/Downloads/Ticket Exchange.csv")
+Ticket_Exchange_raw <- read.csv("~/Documents/Ticket Exchange.csv")
 
 # Create a new variable called Time_Before that find the difference between the event day and the day the ticket was purchases
 Ticket_Exchange_raw$Time_Before <- difftime(Ticket_Exchange_raw$event_date, Ticket_Exchange_raw$add_datetime, units= "days")
@@ -134,7 +134,6 @@ test_data %>% dplyr::select(Opponent, PC1, te_purchase_price)%>% ############
   filter(Opponent == "Oakland Raiders") %>% ############
   filter(PC1=="M") %>% summarise(mean(te_purchase_price)) ############
 
-# GAVIN WANTS TO WORK MORE
 
 new_data$predicted_purchase <- na.omit(new_data$predicted_purchase) ############
 new_data %>% dplyr::select(PC1, predicted_purchase) %>% ############
