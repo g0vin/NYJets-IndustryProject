@@ -20,14 +20,14 @@ simulation <- function(){
                               "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X"),8)
     
     # Assign the Facebook follower values for the 2021 opponents
-    run_schedule$Facebook_Followers <- 
-      ifelse(run_schedule$opponent=="Dolphins",2200000,
-             ifelse(run_schedule$opponent=="Jaguars",690000,
-                    ifelse(run_schedule$opponent=="Bills", 940000,
-                           ifelse(run_schedule$opponent=="Patriots", 6870000,
-                                  ifelse(run_schedule$opponent=="Buccaneers", 1000000,
-                                         ifelse(run_schedule$opponent=="Titans", 960000,
-                                                ifelse(run_schedule$opponent=="Bengals", 1100000, 3980000)))))))
+    # run_schedule$Facebook_Followers <- 
+    #   ifelse(run_schedule$opponent=="Dolphins",2200000,
+    #          ifelse(run_schedule$opponent=="Jaguars",690000,
+    #                 ifelse(run_schedule$opponent=="Bills", 940000,
+    #                        ifelse(run_schedule$opponent=="Patriots", 6870000,
+    #                               ifelse(run_schedule$opponent=="Buccaneers", 1000000,
+    #                                      ifelse(run_schedule$opponent=="Titans", 960000,
+    #                                             ifelse(run_schedule$opponent=="Bengals", 1100000, 3980000)))))))
     
     # Create the schedule for the 2021 season
     run_schedule$season_year <- 2021
