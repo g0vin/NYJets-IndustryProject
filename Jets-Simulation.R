@@ -127,15 +127,17 @@ simulation <- function(){
 # Run the simulation
 simulation()
 
-############
+# Create a list containing all the simulations
 totallist = vector('list', 2) 
 for (i in 1:2) {
   ref_data <- simulation()
   totallist[[i]] <- ref_data
 }
-############
+
+# Viewing the previous lise
 totallist
-############
+
+# Function that transform the list created above to a csv file that contains all simulations
 df_total<-data.frame()
 for (i in 1:32){
   df <- data.frame(totallist[[i]])
