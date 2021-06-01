@@ -117,32 +117,34 @@ new_data <- test_data %>%
 
 # Predict the purchase price on the test data based on the model we created
 new_data$predicted_purchase <- predict(model3, newdata = new_data)
-new_data %>% dplyr::select(PC1, predicted_purchase) ############
-test_data %>% dplyr::select(Opponent, PC1, te_purchase_price)%>%  ############
-  filter(Opponent == "Oakland Raiders") ############
+new_data %>% dplyr::select(PC1, predicted_purchase)
+test_data %>% dplyr::select(Opponent, PC1, te_purchase_price)%>% 
+  filter(Opponent == "Oakland Raiders")
 
 # Omit any NA values on the predicted purchase price
-new_data$predicted_purchase <- na.omit(new_data$predicted_purchase) ############
+new_data$predicted_purchase <- na.omit(new_data$predicted_purchase) 
 
+# Find mean for predicted prices for one level
+new_data %>% dplyr::select(PC1, predicted_purchase) %>%
+  filter(PC1=="M") %>% summarise(mean(predicted_purchase)) 
 
-new_data %>% dplyr::select(PC1, predicted_purchase) %>% ############
-  filter(PC1=="M") %>% summarise(mean(predicted_purchase)) ############
+# Compare predicted vs actual prices per level and opponent
+test_data$te_purchase_price <- na.omit(test_data$te_purchase_price) 
+test_data$te_purchase_price <- as.numeric(test_data$te_purchase_price) 
+test_data %>% dplyr::select(Opponent, PC1, te_purchase_price)%>%
+  filter(Opponent == "Oakland Raiders") %>% 
+  filter(PC1=="M") %>% summarise(mean(te_purchase_price)) 
 
-test_data$te_purchase_price <- na.omit(test_data$te_purchase_price) ############
-test_data$te_purchase_price <- as.numeric(test_data$te_purchase_price) ############
-test_data %>% dplyr::select(Opponent, PC1, te_purchase_price)%>% ############
-  filter(Opponent == "Oakland Raiders") %>% ############
-  filter(PC1=="M") %>% summarise(mean(te_purchase_price)) ############
+# Find mean for predicted prices for each level
+new_data$predicted_purchase <- na.omit(new_data$predicted_purchase) 
+new_data %>% dplyr::select(PC1, predicted_purchase) %>%
+  summarise(mean(predicted_purchase)) 
 
-
-new_data$predicted_purchase <- na.omit(new_data$predicted_purchase) ############
-new_data %>% dplyr::select(PC1, predicted_purchase) %>% ############
-  summarise(mean(predicted_purchase)) ############
-
-test_data$te_purchase_price <- na.omit(test_data$te_purchase_price) ############
-test_data$te_purchase_price <- as.numeric(test_data$te_purchase_price) ############
-test_data %>% dplyr::select(Opponent, PC1, te_purchase_price)%>% ############
-  filter(Opponent == "Oakland Raiders") %>% ############
-  summarise(mean(te_purchase_price)) ############
+# Compare predicted vs actual prices per opponent
+test_data$te_purchase_price <- na.omit(test_data$te_purchase_price) 
+test_data$te_purchase_price <- as.numeric(test_data$te_purchase_price) 
+test_data %>% dplyr::select(Opponent, PC1, te_purchase_price)%>% 
+  filter(Opponent == "Oakland Raiders") %>% 
+  summarise(mean(te_purchase_price)) 
 
 
